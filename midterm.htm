@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>French Midterm Quiz</title>
+<style>
+body { font-family: Arial; background:#f5f5f5; text-align:center; }
+.container { background:white; padding:20px; margin:50px auto; width:420px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); }
+input { padding:10px; width:85%; margin-top:10px; }
+button { padding:10px 20px; margin-top:10px; }
+</style>
+</head>
+<body>
+<div class="container">
+<h2 id="title">French Quiz</h2>
+<p id="question"></p>
+<input type="text" id="answer" placeholder="Write your answer">
+<br>
+<button onclick="submitAnswer()">Submit</button>
+<button onclick="skipSection()">Skip Punkt</button>
+<p id="feedback"></p>
+</div>
+
+<script>
+// Subjects
+let subjects = [
+{p:"je", aux:"ai"},
+{p:"tu", aux:"as"},
+{p:"il", aux:"a"},
+{p:"elle", aux:"a"},
+{p:"nous", aux:"avons"},
+{p:"vous", aux:"avez"},
+{p:"ils", aux:"ont"}
+];
+
+// Verbs
+let verbs = [
+{v:"boire", pp:"bu"},{v:"faire", pp:"fait"},{v:"lire", pp:"lu"},
+{v:"prendre", pp:"pris"},{v:"écrire", pp:"écrit"},{v:"recevoir", pp:"reçu"},
+{v:"savoir", pp:"su"},{v:"pouvoir", pp:"pu"},{v:"devoir", pp:"du"},
+{v:"vouloir", pp:"voulu"},{v:"connaitre", pp:"connu"},{v:"avoir", pp:"eu"},{v:"etre", pp:"été"},
+{v:"parler", pp:"parlé"},{v:"manger", pp:"mangé"},{v:"regarder", pp:"regardé"},
+{v:"finir", pp:"fini"},{v:"choisir", pp:"choisi"},{v:"réussir", pp:"réussi"}
+];
+
+function generatePCQuestions(n=12) {
+let arr = [];
+for(let i=0;i<n;i++){
+let s = subjects[Math.floor(Math.random()*subjects.length)];
+let v = verbs[Math.floor(Math.random()*verbs.length)];
+
+let question = `${s.p} (${v.v})`;
+let answer = `${s.p} ${s.aux} ${v.pp}`;
+
+if(s.p === "je") answer = `j'${s.aux} ${v.pp}`;
+
+arr.push({q:question, a:answer});
+}
+return arr;
+}
+
+// Punkt 2 (expanded)
+let p2 = [
+{q:"j’ai un chien → C’est ___ chien", a:"mon"},
+{q:"j’ai une maison → C’est ___ maison", a:"ma"},
+{q:"tu as un frère → C’est ___ frère", a:"ton"},
+{q:"tu as une soeur → C’est ___ soeur", a:"ta"},
+{q:"il a un livre → C’est ___ livre", a:"son"},
+{q:"il a une amie → C’est ___ amie", a:"son"},
+{q:"elle a une voiture → C’est ___ voiture", a:"sa"},
+{q:"elle a des amis → Ce sont ___ amis", a:"ses"},
+{q:"nous avons un appartement → C’est ___ appartement", a:"notre"},
+{q:"nous avons des enfants → Ce sont ___ enfants", a:"nos"},
+{q:"vous avez un professeur → C’est ___ professeur", a:"votre"},
+{q:"vous avez des amis → Ce sont ___ amis", a:"vos"},
+{q:"ils ont une maison → C’est ___ maison", a:"leur"},
+{q:"ils ont des livres → Ce sont ___ livres", a:"leurs"}
+];
+
+// Punkt 3 (user writes full sentence)
+let p3 = [
+{q:"J’aime la musique → (remplace) la musique", a:"je l'aime"},
+{q:"il visite les endroits → (remplace) les endroits", a:"il les visite"},
+{q:"tu préfères le sport → (remplace) le sport", a:"tu le préfères"},
+{q:"nous aimons la pizza → (remplace) la pizza", a:"nous l'aimons"},
+{q:"elle regarde le film → (remplace) le film", a:"elle le regarde"},
+{q:"vous aimez les chats → (remplace) les chats", a:"vous les aimez"},
+{q:"je prends le livre → (remplace) le livre", a:"je le prends"},
+{q:"ils regardent la télé → (remplace) la télé", a:"ils la regardent"},
+{q:"tu aimes les fleurs → (remplace) les fleurs", a:"tu les aimes"},
+{q:"il mange la pomme → (remplace) la pomme", a:"il la mange"}
+];
+
+function shuffle(arr){
+for(let i=arr.length-1;i>0;i--){
+let j=Math.floor(Math.random()*(i+1));
+[arr[i],arr[j]]=[arr[j],arr[i]];
+}
+}
+
+// Sections (P4 removed)
+let sections = [
+{title:"Punkt 1: Passé Composé", data:generatePCQuestions(12)},
+{title:"Punkt 2: Possessive", data:p2},
+{title:"Punkt 3: COD", data:p3}
+];
+
+sections.forEach(s=>shuffle(s.data));
+
+let secIndex = 0;
+let qIndex = 0;
+let tries = 3;
+
+function showQuestion(){
+document.getElementById("title").innerText = sections[secIndex].title;
+let qObj = sections[secIndex].data[qIndex];
+document.getElementById("question").innerText = qObj.q;
+document.getElementById("answer").value="";
+document.getElementById("feedback").innerText="";
+tries=3;
+}
+
+function nextQuestion(){
+qIndex++;
+if(qIndex >= sections[secIndex].data.length){
+secIndex++;
+qIndex = 0;
+if(secIndex >= sections.length){
+document.getElementById("question").innerText="Finished All!";
+return;
+}
+}
+setTimeout(showQuestion,800);
+}
+
+function submitAnswer(){
+let user = document.getElementById("answer").value.toLowerCase().trim();
+let correct = sections[secIndex].data[qIndex].a.toLowerCase();
+
+if(user === correct){
+document.getElementById("feedback").innerText="Correct!";
+nextQuestion();
+}else{
+tries--;
+if(tries>0){
+document.getElementById("feedback").innerText="Wrong! Tries: "+tries;
+}else{
+document.getElementById("feedback").innerText="Correct: "+correct;
+nextQuestion();
+}
+}
+}
+
+function skipSection(){
+secIndex++;
+qIndex = 0;
+if(secIndex >= sections.length){
+document.getElementById("question").innerText="Finished All!";
+return;
+}
+showQuestion();
+}
+
+showQuestion();
+</script>
+</body>
+</html>
